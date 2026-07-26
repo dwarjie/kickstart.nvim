@@ -99,7 +99,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -165,12 +165,27 @@ do
   vim.o.cursorline = true
 
   -- Minimal number of screen lines to keep above and below the cursor.
-  vim.o.scrolloff = 10
+  vim.o.scrolloff = 999
 
   -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
   -- instead raise a dialog asking if you wish to save the current file(s)
   -- See `:help 'confirm'`
   vim.o.confirm = true
+
+  -- ===========
+  -- CUSTOM
+  -- ===========
+
+  -- setup nvim to use powershell not cmd
+  vim.o.shell = 'powershell'
+  vim.o.shellcmdflag =
+    '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
+  vim.o.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+  vim.o.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+  vim.o.shellquote = ''
+  vim.o.shellxquote = ''
+
+  vim.opt.termguicolors = true
 end
 
 -- ============================================================
@@ -239,6 +254,15 @@ do
   -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
   -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
   -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+
+  -- ==============
+  -- CUSTOM
+  -- ==============
+  vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open Explorer' })
+  vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Normal Mode' })
+  vim.keymap.set('x', '<leader>p', [["_dP]])
+  vim.keymap.set('n', '<leader>lr', '<cmd>LuauLsp regenerate_sourcemap<cr>', { desc = 'Regenerate the sourcemap json file'} )
+  vim.keymap.set({'n', 'v'}, '<leader>d', '\"_d', { desc = 'Delete without yanking' })
 
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
@@ -447,6 +471,33 @@ do
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
+end
+
+-- ============================================================
+-- SECTION 4.1: CUSTOM PLUGINS
+-- ============================================================
+do
+  -- Luau LSP
+  vim.pack.add { gh 'lopi-py/luau-lsp.nvim'  }
+
+  require('luau-lsp').setup {
+    platform = {
+      type = 'roblox',
+    },
+    types = {
+      roblox_security_level = 'PluginSecurity',
+    },
+    sourcemap = {
+      enabled = true,
+      autogenerate = true,
+      rojo_project_file = 'default.project.json',
+      sourcemap_file = 'sourcemap.json',
+    },
+    plugin = {
+      enabled = true,
+      port = 3667,
+    },
+  }
 end
 
 -- ============================================================
@@ -768,6 +819,22 @@ do
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
+
+  require('mason-lspconfig').setup {
+    automatic_enable = {
+      exclude = { 'luau_lsp' }
+    }
+  }
+
+  vim.lsp.config('luau-lsp', {
+    capabilities = {
+      workspace = {
+        didChangeWatchedFiles = {
+          dynamicRegistration = true,
+        },
+      },
+    },
+  })
 end
 
 -- ============================================================
@@ -904,7 +971,8 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'luau' }
+  vim.env.CC = 'gcc'
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -967,7 +1035,7 @@ do
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
   -- require 'kickstart.plugins.neo-tree'
