@@ -175,6 +175,12 @@ do
   -- ===========
   -- CUSTOM
   -- ===========
+  vim.opt.tabstop = 4
+  vim.opt.softtabstop = 4
+  vim.opt.shiftwidth = 4
+  vim.opt.expandtab = true
+
+  vim.opt.smartindent = true
 
   -- setup nvim to use powershell not cmd
   vim.o.shell = 'powershell'
@@ -261,8 +267,8 @@ do
   vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open Explorer' })
   vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Normal Mode' })
   vim.keymap.set('x', '<leader>p', [["_dP]])
-  vim.keymap.set('n', '<leader>lr', '<cmd>LuauLsp regenerate_sourcemap<cr>', { desc = 'Regenerate the sourcemap json file'} )
-  vim.keymap.set({'n', 'v'}, '<leader>d', '\"_d', { desc = 'Delete without yanking' })
+  vim.keymap.set('n', '<leader>lr', '<cmd>LuauLsp regenerate_sourcemap<cr>', { desc = 'Regenerate the sourcemap json file' })
+  vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d', { desc = 'Delete without yanking' })
 
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
@@ -478,7 +484,7 @@ end
 -- ============================================================
 do
   -- Luau LSP
-  vim.pack.add { gh 'lopi-py/luau-lsp.nvim'  }
+  vim.pack.add { gh 'lopi-py/luau-lsp.nvim' }
 
   require('luau-lsp').setup {
     platform = {
@@ -800,6 +806,12 @@ do
 
   -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {}
+  require('mason-lspconfig').setup {
+    automatic_enable = {
+      exclude = { 'luau_lsp' },
+    },
+  }
+
 
   -- Ensure the servers and tools above are installed
   --
@@ -811,6 +823,7 @@ do
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
+    "luau_lsp"
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -819,12 +832,6 @@ do
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
-
-  require('mason-lspconfig').setup {
-    automatic_enable = {
-      exclude = { 'luau_lsp' }
-    }
-  }
 
   vim.lsp.config('luau-lsp', {
     capabilities = {
@@ -1035,10 +1042,12 @@ do
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug'
-  require 'kickstart.plugins.indent_line'
+  -- require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.smear_cursor'
+  require 'kickstart.plugins.neoscroll'
   -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
